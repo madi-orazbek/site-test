@@ -8,8 +8,7 @@ const flash = require('connect-flash');
 const app = express();
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const csrf = require('csurf');
-const csrfProtection = csrf({ cookie: true });
+const path = require('path');
 
 console.log('===== Конфигурация =====');
 console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -21,19 +20,10 @@ console.log('========================');
 // Подключение к БД
 require('./config/db')();
 
-// Конфигурация приложения
-app.set('view engine', 'ejs');
-app.use(express.static('public'));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(cookieParser());
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
-const corsOptions = {
-  credentials: true,
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.CLIENT_URL 
-    : 'http://localhost:3000'
-};
+// Настройка доверия к прокси
+app.set('trust proxy', 1);
+
+// Настройка CORS
 const allowedOrigins = process.env.NODE_ENV === 'production'
   ? ['https://site-test-y16r.onrender.com']
   : ['http://localhost:3000'];
@@ -48,63 +38,68 @@ app.use(cors({
     }
   }
 }));
-app.use(cors(corsOptions));
+
+// Конфигурация приложения
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views')); // Явно указываем путь к шаблонам
+app.use(express.static(path.join(__dirname, 'public'))); // Используем абсолютный путь
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(cookieParser());
 
 // Сессии
 app.use(session({
   secret: process.env.SESSION_SECRET,
-  resave: false,
+  resave: true, // Изменено на true для решения проблем с сессией
   saveUninitialized: false,
   store: MongoStore.create({ 
     mongoUrl: process.env.MONGO_URI,
-    ttl: 24 * 60 * 60
+    ttl: 24 * 60 * 60,
+    autoRemove: 'native'
   }),
   cookie: { 
     maxAge: 1000 * 60 * 60 * 24,
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // Критически важно!
+    secure: process.env.NODE_ENV === 'production', // true для HTTPS в продакшене
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   }
 }));
 
-// Проверка сессии
-app.get('/session', (req, res) => {
-  res.json({
-    session: req.session,
-    user: req.user,
-    authenticated: req.isAuthenticated()
-  });
-});
-
 // Flash сообщения
 app.use(flash());
-
-app.use(csrfProtection);
 
 // Инициализация Passport
 const initializePassport = require('./config/passport');
 initializePassport(passport);
 
-// Passport middleware (ВАЖНО: после сессии!)
+// Passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Переменные для шаблонов (после Passport)
+// Middleware для логирования запросов
+app.use((req, res, next) => {
+  console.log('--- NEW REQUEST ---');
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log('Session ID:', req.sessionID);
+  console.log('Authenticated:', req.isAuthenticated() ? 'Yes' : 'No');
+  console.log('User:', req.user ? req.user.email : 'none');
+  next();
+});
+
+// Переменные для шаблонов
 app.use((req, res, next) => {
   res.locals.user = req.user || null;
   res.locals.success = req.flash('success');
   res.locals.error = req.flash('error');
-  res.locals.csrfToken = req.csrfToken();
-  console.log('Current user:', res.locals.user ? res.locals.user.email : 'none');
   next();
 });
 
-// Главная страница (перед маршрутами)
+// Главная страница
 app.get('/', (req, res) => {
   res.render('index', { user: req.user || null });
 });
 
-// Маршруты (после Passport)
+// Маршруты
 app.use('/', require('./routes/auth'));
 app.use('/courses', require('./routes/courses'));
 app.use('/assignments', require('./routes/assignments'));
@@ -123,18 +118,9 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   console.error('Global error handler:', err.stack);
   
-  // Если это ошибка CSRF
-  if (err.code === 'EBADCSRFTOKEN') {
-    return res.status(403).render('error', {
-      message: 'Invalid CSRF token',
-      user: req.user || null
-    });
-  }
-  
   res.status(500).render('error', { 
-    message: 'Internal server error',
-    user: req.user || null,
-    error: process.env.NODE_ENV === 'development' ? err : null
+    message: 'Внутренняя ошибка сервера',
+    user: req.user || null
   });
 });
 
