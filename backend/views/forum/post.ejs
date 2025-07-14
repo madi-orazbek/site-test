@@ -1,0 +1,45 @@
+<%- include('../partials/header', { title: post.title }) %>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h1 class="card-title"><%= post.title %></h1>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Автор: <%= post.author.username %></span>
+                    <span><%= post.createdAt.toLocaleString() %></span>
+                </div>
+                <p class="card-text"><%= post.content %></p>
+            </div>
+        </div>
+        
+        <h3>Ответы (<%= post.replies.length %>)</h3>
+        
+        <% post.replies.forEach(reply => { %>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <strong><%= reply.author.username %></strong>
+                        <span><%= reply.createdAt.toLocaleDateString() %></span>
+                    </div>
+                    <p><%= reply.content %></p>
+                </div>
+            </div>
+        <% }); %>
+        
+        <div class="card mt-4">
+            <div class="card-body">
+                <h4 class="card-title">Добавить ответ</h4>
+                <form action="/forum/<%= post.id %>/reply" method="POST">
+                    <div class="mb-3">
+                        <textarea name="content" class="form-control" rows="3" 
+                                  placeholder="Ваш ответ..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

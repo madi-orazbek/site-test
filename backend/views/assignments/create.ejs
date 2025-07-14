@@ -1,0 +1,28 @@
+<%- include('../partials/header', { title: 'Создать задание' }) %>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <h2>Новое задание для курса: <%= course.title %></h2>
+        <form action="/courses/<%= course.id %>/assignments" method="POST">
+            <div class="mb-3">
+                <label class="form-label">Название задания</label>
+                <input type="text" name="title" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Описание</label>
+                <textarea name="description" class="form-control" rows="4" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Срок выполнения</label>
+                <input type="date" name="dueDate" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Цена выполнения ($)</label>
+                <input type="number" name="price" class="form-control" min="0" step="0.01" required>
+            </div>
+            <button type="submit" class="btn btn-success">Создать задание</button>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,14 @@
+<%- include('partials/header', { title: 'Ошибка' }) %>
+
+<div class="container mt-5">
+  <div class="alert alert-danger">
+    <h4 class="alert-heading">Произошла ошибка</h4>
+    <p><%= message %></p>
+    <hr>
+    <p class="mb-0">
+      <a href="/" class="alert-link">Вернуться на главную</a>
+    </p>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

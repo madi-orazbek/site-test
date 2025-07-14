@@ -1,0 +1,25 @@
+<%- include('../partials/header', { title: 'Форум' }) %>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Обсуждения</h1>
+            <a href="/forum/new" class="btn btn-primary">Создать тему</a>
+        </div>
+        
+        <div class="list-group">
+            <% posts.forEach(post => { %>
+                <a href="/forum/<%= post.id %>" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1"><%= post.title %></h5>
+                        <small><%= post.createdAt.toLocaleDateString() %></small>
+                    </div>
+                    <p class="mb-1"><%= post.content.substring(0, 100) %>...</p>
+                    <small>Автор: <%= post.author.username %></small>
+                </a>
+            <% }); %>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

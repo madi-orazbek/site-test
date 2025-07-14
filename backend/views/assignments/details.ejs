@@ -1,0 +1,53 @@
+<%- include('../partials/header', { title: assignment.title }) %>
+
+<div class="row">
+    <div class="col-md-8">
+        <h1><%= assignment.title %></h1>
+        <p>Курс: <a href="/courses/<%= assignment.course.id %>"><%= assignment.course.title %></a></p>
+        <p><%= assignment.description %></p>
+        <p>Срок: <%= assignment.dueDate.toLocaleDateString() %></p>
+        <p>Цена: $<%= assignment.price %></p>
+        
+        <% if (user && user.role === 'student') { %>
+            <div class="card mt-4">
+                <div class="card-header">Сдать решение</div>
+                <div class="card-body">
+                    <form action="/assignments/<%= assignment.id %>/submit" method="POST">
+                        <div class="mb-3">
+                            <textarea name="solution" class="form-control" rows="4" 
+                                      placeholder="Ваше решение..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Отправить решение</button>
+                    </form>
+                </div>
+            </div>
+        <% } %>
+        
+        <h3 class="mt-4">Сданные решения</h3>
+        <div class="list-group">
+            <% assignment.submissions.forEach(submission => { %>
+                <div class="list-group-item">
+                    <h5><%= submission.student.username %></h5>
+                    <p><%= submission.solution %></p>
+                    <small><%= submission.submittedAt.toLocaleString() %></small>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+</div>
+<% if (user && user.role === 'student' && !assignment.isPurchased) { %>
+  <div class="card mt-4">
+    <div class="card-header bg-primary text-white">
+      Приобрести задание
+    </div>
+    <div class="card-body">
+      <p>Цена: $<%= assignment.price %></p>
+      <form action="/assignments/<%= assignment.id %>/buy" method="POST">
+        <button type="submit" class="btn btn-success">
+          Купить сейчас
+        </button>
+      </form>
+    </div>
+  </div>
+<% } %>
+<%- include('../partials/footer') %>

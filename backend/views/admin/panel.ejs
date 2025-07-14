@@ -1,0 +1,155 @@
+<%- include('../partials/header', { title: 'Админ-панель' }) %>
+
+<div class="container mt-4">
+  <h1 class="mb-4">Админ-панель управления курсами</h1>
+  
+  <!-- Поиск пользователей -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form action="/admin/search" method="GET">
+        <div class="input-group">
+          <input type="text" name="query" class="form-control" 
+                 placeholder="Поиск пользователей по имени или email"
+                 value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-search"></i> Поиск
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Список пользователей -->
+  <div class="card">
+    <div class="card-header bg-primary text-white">
+      Пользователи
+    </div>
+    <div class="card-body">
+      <% if (users.length === 0) { %>
+        <div class="alert alert-info">Пользователи не найдены</div>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Имя пользователя</th>
+                <th>Email</th>
+                <th>Роль</th>
+                <th>Доступные курсы</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% users.forEach(u => { %>
+                <tr>
+                  <td><%= u.username %></td>
+                  <td><%= u.email %></td>
+                  <td>
+                    <span class="badge bg-<%= u.role === 'admin' ? 'danger' : u.role === 'teacher' ? 'warning' : 'success' %>">
+                      <%= u.role === 'admin' ? 'Админ' : u.role === 'teacher' ? 'Преподаватель' : 'Студент' %>
+                    </span>
+                  </td>
+                  <td>
+                    <% if (u.accessibleCourses.length > 0) { %>
+                      <ul class="list-unstyled">
+                        <% u.accessibleCourses.forEach(course => { %>
+                          <li>
+                            <span class="badge bg-info">
+                              <%= courses.find(c => c._id.equals(course))?.title || 'Неизвестный курс' %>
+                            </span>
+                          </li>
+                        <% }) %>
+                      </ul>
+                    <% } else { %>
+                      <span class="text-muted">Нет доступа</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-primary" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#accessModal"
+                            data-user-id="<%= u._id %>"
+                            data-user-name="<%= u.username %>">
+                      <i class="bi bi-key"></i> Управление доступом
+                    </button>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно управления доступом -->
+<div class="modal fade" id="accessModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Управление доступом</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="/admin/access" method="POST">
+        <div class="modal-body">
+          <input type="hidden" name="userId" id="modalUserId">
+          <p>Пользователь: <strong id="modalUserName"></strong></p>
+          
+          <div class="mb-3">
+            <label class="form-label">Выберите курс:</label>
+            <select name="courseId" class="form-select" required>
+              <option value="" disabled selected>-- Выберите курс --</option>
+              <% courses.forEach(course => { %>
+                <option value="<%= course._id %>"><%= course.title %></option>
+              <% }) %>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Действие:</label>
+            <div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" 
+                       name="action" id="grantAccess" value="grant" checked>
+                <label class="form-check-label" for="grantAccess">
+                  Предоставить доступ
+                </label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" 
+                       name="action" id="revokeAccess" value="revoke">
+                <label class="form-check-label" for="revokeAccess">
+                  Отозвать доступ
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Обработчик открытия модального окна
+  document.addEventListener('DOMContentLoaded', function() {
+    const accessModal = document.getElementById('accessModal');
+    if (accessModal) {
+      accessModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const userId = button.getAttribute('data-user-id');
+        const userName = button.getAttribute('data-user-name');
+        
+        document.getElementById('modalUserId').value = userId;
+        document.getElementById('modalUserName').textContent = userName;
+      });
+    }
+  });
+</script>
+
+<%- include('../partials/footer') %>

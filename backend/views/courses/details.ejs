@@ -1,0 +1,46 @@
+<%- include('../partials/header', { title: course.title }) %>
+
+<div class="row">
+    <div class="col-md-8">
+        <h1><%= course.title %></h1>
+        <p class="lead"><%= course.description %></p>
+        <p>Преподаватель: <%= course.instructor.username %></p>
+        
+        <h3 class="mt-5">Задания курса</h3>
+        <% if (user && user.role === 'teacher') { %>
+            <a href="/courses/<%= course.id %>/assignments/new" class="btn btn-primary mb-3">Добавить задание</a>
+        <% } %>
+        
+        <div class="list-group">
+            <% assignments.forEach(assignment => { %>
+                <div class="list-group-item">
+                    <h5><%= assignment.title %></h5>
+                    <p><%= assignment.description %></p>
+                    <p>Срок: <%= assignment.dueDate.toLocaleDateString() %></p>
+                    <p>Цена: $<%= assignment.price %></p>
+                    <a href="/assignments/<%= assignment.id %>" class="btn btn-sm btn-outline-primary">Подробнее</a>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Участники курса</div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <% course.students.forEach(student => { %>
+                        <li class="list-group-item"><%= student.username %></li>
+                    <% }); %>
+                </ul>
+                <% if (user && !isEnrolled) { %>
+                    <form action="/courses/<%= course.id %>/enroll" method="POST" class="mt-3">
+                        <button type="submit" class="btn btn-primary">Записаться на курс</button>
+                    </form>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
