@@ -26,6 +26,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
+const corsOptions = {
+  credentials: true,
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.CLIENT_URL 
+    : 'http://localhost:3000'
+};
+app.use(cors(corsOptions));
 
 // Сессии
 app.use(session({
@@ -39,7 +46,8 @@ app.use(session({
   cookie: { 
     maxAge: 1000 * 60 * 60 * 24,
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production'
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // Критически важно!
   }
 }));
 
