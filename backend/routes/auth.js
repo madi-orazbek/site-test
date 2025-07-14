@@ -18,6 +18,18 @@ router.get('/login', (req, res) => {
   });
 });
 
+router.get('/auth/status', (req, res) => {
+  res.json({
+    authenticated: req.isAuthenticated(),
+    user: req.user ? {
+      id: req.user.id,
+      username: req.user.username,
+      email: req.user.email,
+      role: req.user.role
+    } : null
+  });
+});
+
 router.post('/login', (req, res, next) => {
   console.log('Login request body:', req.body);
 
