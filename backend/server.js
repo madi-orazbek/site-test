@@ -10,6 +10,13 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
 
+console.log('===== Конфигурация =====');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('MONGO_URI:', process.env.MONGO_URI ? '***' : 'not set');
+console.log('SESSION_SECRET:', process.env.SESSION_SECRET ? '***' : 'not set');
+console.log('PORT:', process.env.PORT);
+console.log('========================');
+
 // Подключение к БД
 require('./config/db')();
 
