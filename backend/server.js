@@ -8,7 +8,6 @@ const flash = require('connect-flash');
 const app = express();
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
 
 console.log('===== Конфигурация =====');
 console.log('NODE_ENV:', process.env.NODE_ENV);
