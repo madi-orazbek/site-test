@@ -34,6 +34,20 @@ const corsOptions = {
     ? process.env.CLIENT_URL 
     : 'http://localhost:3000'
 };
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? ['https://site-test-y16r.onrender.com']
+  : ['http://localhost:3000'];
+
+app.use(cors({
+  credentials: true,
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}));
 app.use(cors(corsOptions));
 
 // Сессии
