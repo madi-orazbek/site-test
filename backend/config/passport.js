@@ -30,8 +30,7 @@ module.exports = function(passport) {
     }
   }
 ));
-  ));
-
+  
   // Сериализация пользователя
   passport.serializeUser((user, done) => {
     done(null, user.id);
