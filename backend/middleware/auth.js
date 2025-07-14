@@ -25,13 +25,3 @@ module.exports = {
     res.redirect('/');
   }
 };
-exports.ensureAdmin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') return next();
-  req.flash('error', 'Доступно только администраторам');
-  res.redirect('/');
-};
-exports.ensureAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) return next();
-  req.flash('error', 'Пожалуйста войдите для доступа');
-  res.redirect('/login');
-};
