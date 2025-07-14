@@ -120,10 +120,20 @@ app.use((req, res) => {
 
 // Обработка ошибок
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Global error handler:', err.stack);
+  
+  // Если это ошибка CSRF
+  if (err.code === 'EBADCSRFTOKEN') {
+    return res.status(403).render('error', {
+      message: 'Invalid CSRF token',
+      user: req.user || null
+    });
+  }
+  
   res.status(500).render('error', { 
-    message: 'Внутренняя ошибка сервера',
-    user: req.user || null
+    message: 'Internal server error',
+    user: req.user || null,
+    error: process.env.NODE_ENV === 'development' ? err : null
   });
 });
 
