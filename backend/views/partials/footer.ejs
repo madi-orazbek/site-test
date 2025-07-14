@@ -1,7 +1,42 @@
-    </div>
-    <footer class="bg-dark text-white mt-5 p-4 text-center">
-        <p>&copy; 2025 Учебный Форум. Все права защищены.</p>
+    </div> <!-- Закрываем container mt-4 -->
+
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Учебный Форум</h5>
+                    <p>Платформа для обучения, выполнения заданий и обсуждения курсов</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p>&copy; 2025 Учебный Форум. Все права защищены.</p>
+                </div>
+            </div>
+        </div>
     </footer>
+
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Скрипт для обновления интерфейса при изменении аутентификации -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Функция для проверки статуса аутентификации
+            function checkAuthStatus() {
+                fetch('/auth/status')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.authenticated) {
+                            console.log('User is authenticated:', data.user.username);
+                            // Здесь можно обновить UI
+                        } else {
+                            console.log('User is not authenticated');
+                        }
+                    });
+            }
+            
+            // Проверяем статус каждые 5 секунд
+            setInterval(checkAuthStatus, 5000);
+        });
+    </script>
 </body>
 </html>
