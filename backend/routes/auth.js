@@ -15,18 +15,17 @@ router.get('/login', (req, res) => {
   res.render('auth/login', { error: null });
 });
 
-router.post('/login', 
-  passport.authenticate('local', { 
-    failureRedirect: '/login',
-    failureFlash: true 
-  }), 
-  (req, res) => {
-    res.redirect('/');
-  }
-);
+router.post('/login', passport.authenticate('local'), (req, res) => {
+  // Не делайте редирект на API роуты
+  res.json({ success: true, user: req.user });
+});
 
 // Выход
-router.get('/logout', authController.logout);
+router.get('/logout', (req, res) => {
+  req.logout(() => {
+    res.redirect('/'); // Редирект на главную
+  });
+});
 
 // Профиль
 router.get('/profile', authController.profile);
