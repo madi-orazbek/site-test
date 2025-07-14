@@ -36,6 +36,16 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production'
   }
 }));
+
+// Проверка сессии
+app.get('/session', (req, res) => {
+  res.json({
+    session: req.session,
+    user: req.user,
+    authenticated: req.isAuthenticated()
+  });
+});
+
 // Flash сообщения
 app.use(flash());
 
