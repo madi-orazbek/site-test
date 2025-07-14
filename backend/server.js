@@ -8,6 +8,8 @@ const flash = require('connect-flash');
 const app = express();
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const csrf = require('csurf');
+const csrfProtection = csrf({ cookie: true });
 
 console.log('===== Конфигурация =====');
 console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -63,6 +65,8 @@ app.get('/session', (req, res) => {
 // Flash сообщения
 app.use(flash());
 
+app.use(csrfProtection);
+
 // Инициализация Passport
 const initializePassport = require('./config/passport');
 initializePassport(passport);
@@ -76,6 +80,7 @@ app.use((req, res, next) => {
   res.locals.user = req.user || null;
   res.locals.success = req.flash('success');
   res.locals.error = req.flash('error');
+  res.locals.csrfToken = req.csrfToken();
   next();
 });
 
