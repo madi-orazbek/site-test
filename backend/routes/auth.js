@@ -17,6 +17,11 @@ router.get('/login', (req, res) => {
 
 router.post('/login', (req, res, next) => {
   console.log('Login request body:', req.body);
+
+    if (!req.body.email || !req.body.password) {
+    console.error('Missing email or password');
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
   
   passport.authenticate('local', (err, user, info) => {
     if (err) {
